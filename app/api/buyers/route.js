@@ -1,31 +1,29 @@
 import { NextResponse } from "next/server";
 
 export async function GET() {
- const buyers = [
-  {
-    id: 1,
-    company: "Modern Living USA",
-    email: "buying@modernliving.com",
-    city: "New York",
-    category: "Home Furnishings",
-    match: "95%"
-  },
-  {
-    id: 2,
-    company: "Elegant Interiors",
-    email: "contact@elegantinteriors.com",
-    city: "Chicago",
-    category: "Interior Design",
-    match: "91%"
-  },
-  {
-    id: 3,
-    company: "Home Decor Imports",
-    email: "purchases@homedecorimports.com",
-    city: "Los Angeles",
-    category: "Decor Imports",
-    match: "88%"
-  },
-];
+  const response = await fetch(
+    "https://nominatim.openstreetmap.org/search?q=home+decor+store+usa&format=json&limit=10",
+    {
+      headers: {
+        "User-Agent": "HomeDecorConnect"
+      }
+    }
+  );
+
+  const data = await response.json();
+
+  const buyers = data.map((item, index) => ({
+  id: index + 1,
+  company: item.display_name.split(",")[0],
+  city: item.display_name,
+  category: "Home Decor",
+  email: `contact@${item.display_name
+    .split(",")[0]
+    .replace(/\s+/g, "")
+    .replace(/[^a-zA-Z]/g, "")
+    .toLowerCase()}.com`,
+  match: `${95 - index}%`,
+}));
+
   return NextResponse.json(buyers);
 }
